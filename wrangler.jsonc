@@ -1,0 +1,19 @@
+{
+  "name": "gateway-traffic-test",
+  "main": "src/index.js",
+  // Replace with your Cloudflare account ID.
+  "account_id": "<YOUR_ACCOUNT_ID>",
+  "compatibility_date": "2025-11-17",
+  "workers_dev": true,
+  "observability": { "enabled": true },
+  "triggers": { "crons": ["* * * * *"] },
+  "vars": {
+    "DAILY_REQUESTS": "6000",
+    "TZ_OFFSET_HOURS": "0",
+    // Replace <YOUR_WORKERS_SUBDOMAIN> with your account's workers.dev subdomain.
+    "SINK_URL": "https://gateway-traffic-test.<YOUR_WORKERS_SUBDOMAIN>.workers.dev/sink"
+  },
+  "vpc_networks": [
+    { "binding": "EGRESS", "network_id": "cf1:network", "remote": true }
+  ]
+}
