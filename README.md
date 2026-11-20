@@ -171,12 +171,6 @@ Checked by simulation only, against a mocked network:
 
 - The volume curve produces about 6,000 requests on a weekday and about 1,200 on a weekend day, with at most 12 in any one minute.
 
-Not yet tested:
-
-- **DLP matches.** A test upload of card numbers was logged with no DLP profile match, in an account where no HTTP policy was confirmed to reference a DLP profile.
-- **Blocks in the HTTP logs.** The malware block did not appear in the HTTP logs, which suggests it came from a DNS policy. Blocks made at DNS show in DNS analytics only.
-- **Content-category test domains.** `hacking`, `drugs` and `adultthemes.testcategory.com` follow Cloudflare's documented naming rule but have not been confirmed to exist.
-- **The pause and resume commands** above.
 
 ## Limits and caveats
 
