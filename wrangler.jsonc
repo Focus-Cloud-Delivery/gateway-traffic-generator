@@ -10,8 +10,26 @@
   "vars": {
     "DAILY_REQUESTS": "6000",
     "TZ_OFFSET_HOURS": "0",
-    // Replace <YOUR_WORKERS_SUBDOMAIN> with your account's workers.dev subdomain.
-    "SINK_URL": "https://gateway-traffic-test.focuspoc.nfr-emea-gb-focusgroup-poc.workers.dev/sink"
+    // Format: https://<worker-name>.<account-workers-subdomain>.workers.dev/sink
+    "SINK_URL": "https://gateway-traffic-test.nfr-emea-gb-focusgroup-poc.workers.dev/sink",
+    // Account-specific groups, added to the built-in ones. The base groups weigh about 109 in
+    // total, so these 18 make up roughly 14% of traffic. Comments name the policy each targets.
+    // HTTP: { name, weight, urls }. TCP: { name, weight, kind: "tcp", targets: ["host:port"] }.
+    "EXTRA_GROUPS": [
+      // 12010 POC - HTTP - Isolate risky sites (list: example.com, neverssl.com)
+      { "name": "policy-isolate", "weight": 2, "urls": ["https://example.com/", "http://neverssl.com/"] },
+      // 10030 POC - DNS - Block domain list
+      { "name": "policy-blocklist", "weight": 1, "urls": ["https://badguys.focusgroup-gb-poc.cftenant.com/", "https://example.org/"] },
+      // Published Access apps behind the azure-italynorth tunnel (HTTP logs, Access login redirects)
+      { "name": "access-public-apps", "weight": 3, "urls": ["https://intranet.focusgroup-gb-poc.cftenant.com/", "https://web-app.focusgroup-gb-poc.cftenant.com/", "https://rdp.focusgroup-gb-poc.cftenant.com/", "https://ssh-cft.focusgroup-gb-poc.cftenant.com/", "https://cloudflareos.focusgroup-gb-poc.cftenant.com/"] },
+      // 10010 POC - DNS - Resolve internal domains via Azure DNS (Azure Private DNS zones, A -> 172.16.1.4)
+      { "name": "internal-dns", "weight": 2, "timeoutMs": 4000, "urls": ["http://intranet.focuspoc.internal/", "http://hr.focuspoc.internal/", "http://wiki.focuspoc.internal/"] },
+      // Unverified until the tunnel is up: no Gateway log entries seen with it down.
+      // 11005 / 11010 / 11020 private web apps. No user identity, so 172.16.1.0/24 should hit 11020 block.
+      { "name": "private-web", "weight": 4, "timeoutMs": 4000, "urls": ["http://172.16.1.4/", "http://172.16.1.4/health", "http://172.16.0.5/"] },
+      // 10990 / 11000 / 11020 private TCP: SSH and SMB to vm-app-001, RDP and WinRM to vm-win-001
+      { "name": "private-tcp", "weight": 6, "kind": "tcp", "targets": ["172.16.1.4:22", "172.16.1.4:445", "172.16.1.4:5432", "172.16.0.5:3389", "172.16.0.5:5985", "172.16.0.5:445"] }
+    ]
   },
   "vpc_networks": [
     { "binding": "EGRESS", "network_id": "cf1:network", "remote": true }
